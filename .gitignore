@@ -1,0 +1,33 @@
+# Build artifacts
+*.o
+*.obj
+moc_*.cpp
+moc_*.h
+*.moc
+
+# Build directories
+build*/
+obj/
+moc/
+_pkg_build/
+_pkg_deb/
+_pkg_deb_20260815/
+_pkg_old/
+_pkg_verify_20260815/
+_pkg_verify_final/
+
+# Qt Creator user files
+*.pro.user
+
+# Packages
+*.deb
+*.changes
+*.rpm
+
+# Binaries
+tieba
+tieba.exe
+
+# Misc
+strings_report.txt
+build-check-*/

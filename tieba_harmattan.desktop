@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Name=TiebaLite
+Name[zh_CN]=贴吧精简版
+Comment=Third-party Baidu Tieba client for Harmattan
+Exec=/usr/bin/invoker --type=e -s /opt/tieba/bin/tieba
+Icon=/usr/share/icons/hicolor/80x80/apps/tieba80.png
+X-Window-Icon=
+X-HildonDesk-ShowInToolbar=true
+X-Osso-Type=application/x-executable
+

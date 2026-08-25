@@ -1,0 +1,53 @@
+<!-- HAND-WRITTEN aegis manifest for TiebaLite (Nokia N9 / Harmattan).
+     Do NOT start this file with "AutoGenerateAegisFile": with that marker the
+     Harmattan packaging step ignores the <aegis> block below and auto-scans
+     the (cross-compiled) binary. The scan finds nothing, the manifest becomes
+     EMPTY, and aegis on the device rejects the package with
+     "invalid package name" / "package name not available".
+     Keep this file starting with a comment (not "AutoGenerateAegisFile" or
+     "NoAegisFile") so the <aegis> block below is used verbatim. -->
+<!-- Aegis manifest declares the security credentials required by an
+     application to run correctly. By default, a manifest file will be
+     created or updated automatically as a part of build.
+
+     The detection of required credentials is based on static scan of
+     application binaries. In some cases, the scan may not be able to
+     detect the correct set of permissions. If this is the case, you must
+     declare the credentials required by your application in this file.
+
+     To create a manifest file automatically as a part of build (DEFAULT):
+
+      * Make sure this file starts with the string "AutoGenerateAegisFile" (without quotes).
+      * Alternatively, it can also be completely empty.
+
+     To provide a manifest yourself:
+
+      * List the correct credentials for the application in this file.
+      * Some commented-out examples of often required tokens are provided.
+      * Ensure the path to your application binary given in
+        '<for path="/path/to/app" />' is correct.
+      * Please do not request more credentials than what your application
+        actually requires.
+
+     To disable manifest file:
+
+      * Replace this file with a file starting with the string "NoAegisFile" (without quotes).
+      * Final application package will not contain a manifest.
+
+-->
+<!-- TiebaLite needs network access (JSON/protobuf APIs, images, update check).
+     The binary links QtNetwork, so the automatic scan grants network; the
+     explicit credential below is a safety net if auto-generation misses it. -->
+<aegis>
+	<request policy="add">
+
+		<!-- Internet access (JSON/protobuf APIs, images, update check). -->
+		<credential name="NetworkAccess" />
+
+	</request>
+
+	<for path="/opt/tieba/bin/tieba" />
+	<!-- applauncherd booster (CONFIG += qdeclarative-boostable): the app runs
+	     through applauncherd.bin, so the booster must inherit NetworkAccess too. -->
+	<for path="applauncherd-launcher::/usr/bin/applauncherd.bin" />
+</aegis>
