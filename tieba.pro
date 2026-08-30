@@ -1,3 +1,5 @@
+VERSION = 1.0.0
+
 # Add more folders to ship with the application, here
 folder_01.source = qml/tieba
 folder_01.target = qml

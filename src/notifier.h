@@ -3,7 +3,7 @@
 
 // System notifications via org.freedesktop.Notifications (DBus). Harmattan apps
 // are suspended when backgrounded, so notifications are only used for in-session
-// events (e.g. one-key sign-in completion) as a progressive enhancement.
+// events as a progressive enhancement.
 
 #include <QObject>
 #include <QString>

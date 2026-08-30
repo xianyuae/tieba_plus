@@ -3,7 +3,7 @@
 
 // SQLite persistence layer (Qt 4.7 QSqlDatabase). Tables: accounts, drafts,
 // history, search_history, favorites, blacklist_user, blacklist_keyword,
-// forum_cache, sign_record.
+// forum_cache, page_cache.
 
 #include <QObject>
 #include <QString>
@@ -54,11 +54,10 @@ public:
     Q_INVOKABLE void removeBlacklistUser(const QString &uid);
     Q_INVOKABLE void removeBlacklistKeyword(const QString &keyword);
 
-    // Followed-forum cache + sign records
+    // Followed-forum cache
     Q_INVOKABLE QVariantList forumCache() const;
     Q_INVOKABLE void replaceForumCache(const QList<QVariantMap> &forums);
-    Q_INVOKABLE bool signedToday(const QString &date) const;
-    Q_INVOKABLE void markSigned(const QString &date, int count);
+    Q_INVOKABLE void clearCache();
 
     // Offline page cache (generic key -> JSON; used by TiebaApi for
     // frs/pb/floor pages so cached lists show when offline)

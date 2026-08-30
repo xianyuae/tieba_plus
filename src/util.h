@@ -16,6 +16,7 @@ public:
     Q_INVOKABLE QString timeAgo(qlonglong ms);
     Q_INVOKABLE QString formatNumber(qint64 n);
     Q_INVOKABLE void copyText(const QString &text);
+    Q_INVOKABLE void showToast(const QString &message);
     Q_INVOKABLE void openUrl(const QString &url);
     Q_INVOKABLE void saveImageToGallery(const QString &localPath);
     Q_INVOKABLE QString pickImage(); // native file picker, returns local path or ""

@@ -13,7 +13,7 @@ Copy-Item 'C:\Users\ae\Desktop\tieba\qtc_packaging\debian_harmattan\changelog' "
 Copy-Item 'C:\Users\ae\Desktop\tieba\qtc_packaging\debian_harmattan\copyright' "$stage/debian/tieba/DEBIAN/"
 $binControl = "$stage/debian/tieba/DEBIAN/control"
 Get-Content 'C:\Users\ae\Desktop\tieba\qtc_packaging\debian_harmattan\control' | Where-Object { $_ -notmatch '^Architecture:' -and $_ -notmatch '^Standards-Version:' } | Set-Content $binControl
-Add-Content $binControl 'Version: 0.0.2'
+Add-Content $binControl 'Version: 1.0.0'
 Add-Content $binControl 'Architecture: armel'
 Copy-Item 'C:\Users\ae\Desktop\tieba\qtc_packaging\debian_harmattan\manifest.aegis' "$stage/debian/tieba.aegis"
 # sanity checks: launcher must not use the declarative booster

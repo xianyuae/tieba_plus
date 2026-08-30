@@ -54,6 +54,8 @@ static void tiebaMessageHandler(QtMsgType type, const char *msg)
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QScopedPointer<QApplication> app(createApplication(argc, argv));
+    QCoreApplication::setApplicationName(QString::fromUtf8("百度贴吧+"));
+    QCoreApplication::setApplicationVersion(QLatin1String("1.0.0"));
 
     // Route Qt/QML diagnostics to stderr and ~/.config/TiebaLite/qml.log so
     // load errors are visible on device and on desktop.

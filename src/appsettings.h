@@ -15,7 +15,6 @@ class AppSettings : public QObject
     Q_PROPERTY(int density READ density WRITE setDensity NOTIFY settingsChanged)    // 0 compact, 1 standard, 2 comfortable
     Q_PROPERTY(int fontScale READ fontScale WRITE setFontScale NOTIFY settingsChanged) // percent, 100 default
     Q_PROPERTY(bool immersive READ immersive WRITE setImmersive NOTIFY settingsChanged)
-    Q_PROPERTY(bool autoSignOnLaunch READ autoSignOnLaunch WRITE setAutoSignOnLaunch NOTIFY settingsChanged)
     Q_PROPERTY(bool onlyWifiImages READ onlyWifiImages WRITE setOnlyWifiImages NOTIFY settingsChanged)
     Q_PROPERTY(QString baiduId READ baiduId WRITE setBaiduId NOTIFY settingsChanged) // upload cookie BAIDUID
 public:
@@ -31,8 +30,6 @@ public:
     void setFontScale(int percent);
     bool immersive() const;
     void setImmersive(bool on);
-    bool autoSignOnLaunch() const;
-    void setAutoSignOnLaunch(bool on);
     bool onlyWifiImages() const;
     void setOnlyWifiImages(bool on);
     QString baiduId() const;

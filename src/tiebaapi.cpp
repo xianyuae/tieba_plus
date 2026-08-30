@@ -58,7 +58,7 @@ static HttpParams merge(const HttpParams &common, const HttpParams &business)
 } // namespace
 
 TiebaApi::TiebaApi(QObject *parent)
-    : QObject(parent), m_preferInsecure(false), m_signIndex(0), m_signSuccess(0), m_signFailed(0)
+    : QObject(parent), m_preferInsecure(false)
 {
     m_http = new HttpClient(this);
     connect(m_http, SIGNAL(finished(int, bool, int, QByteArray, QString)),
@@ -417,48 +417,6 @@ void TiebaApi::login(const QString &bduss, const QString &stoken, const QString 
 
 // ---- actions ----
 
-void TiebaApi::signForum(const QString &fid, const QString &kw)
-{
-    signForumInternal(fid, kw, false);
-}
-
-void TiebaApi::signForumInternal(const QString &fid, const QString &kw, bool oneKey)
-{
-    AccountManager *ac = AccountManager::instance();
-    HttpParams b;
-    b.add(QLatin1String("fid"), fid);
-    b.add(QLatin1String("kw"), kw);
-    b.add(QLatin1String("tbs"), ac->tbs());
-    b.add(QLatin1String("_client_version"), QLatin1String("11.10.8.6"));
-    b.add(QLatin1String("stoken"), ac->stoken());
-    QVariantMap ctx;
-    ctx.insert(QLatin1String("kw"), kw);
-    ctx.insert(QLatin1String("onekey"), oneKey);
-    sendSignedForm(QLatin1String("http://c.tieba.baidu.com/c/c/forum/sign"), officialCommonParams(), b,
-                   headersWithUserAgent(QLatin1String("bdtb for Android 11.10.8.6")), ReqSign, ctx);
-}
-
-void TiebaApi::oneKeySign(const QVariantList &forums)
-{
-    m_signQueue = forums;
-    m_signIndex = 0;
-    m_signSuccess = 0;
-    m_signFailed = 0;
-    continueOneKeySign();
-}
-
-void TiebaApi::continueOneKeySign()
-{
-    if (m_signIndex >= m_signQueue.size()) {
-        LogStore::instance()->append(QLatin1String("sign"), QLatin1String("onekey"),
-                                     QString::fromLatin1("done ok=%1 fail=%2").arg(m_signSuccess).arg(m_signFailed));
-        emit oneKeySignDone(m_signSuccess, m_signFailed);
-        return;
-    }
-    const QVariantMap f = m_signQueue.at(m_signIndex).toMap();
-    signForumInternal(js(f, "fid"), js(f, "name"), true);
-}
-
 void TiebaApi::likeForum(const QString &fid, const QString &kw)
 {
     AccountManager *ac = AccountManager::instance();
@@ -799,16 +757,6 @@ void TiebaApi::loadForumDetail(const QString &forumId)
 
 // ---- misc ----
 
-void TiebaApi::checkUpdate()
-{
-    HttpClient::Headers h;
-    h << qMakePair(QString(QLatin1String("Accept")), QString(QLatin1String("application/vnd.github+json")));
-    QVariantMap ctx;
-    const int id = m_http->get(QLatin1String("https://api.github.com/repos/min09577/TiebaLite/releases/latest"), h);
-    Pending p; p.type = ReqCheckUpdate; p.ctx = ctx;
-    m_pending.insert(id, p);
-}
-
 void TiebaApi::cancelAll()
 {
     m_http->cancelAll();
@@ -916,7 +864,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
                 item.insert(QLatin1String("fid"), f.value(QLatin1String("fid")));
                 item.insert(QLatin1String("name"), f.value(QLatin1String("name")));
                 item.insert(QLatin1String("level"), f.value(QLatin1String("level")));
-                item.insert(QLatin1String("isSignIn"), f.value(QLatin1String("is_signed")));
                 item.insert(QLatin1String("offline"), 1);
                 out << item;
             }
@@ -952,7 +899,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
         case ReqUserProfile: emit userProfileReady(QVariantMap(), err); break;
         case ReqUserPost: emit userPostReady(QVariantList(), false, err); break;
         case ReqForumDetail: emit forumDetailReady(QVariantMap(), err); break;
-        case ReqSign: emit actionFinished(QLatin1String("sign"), false, err, QVariantMap()); break;
         case ReqLikeForum: emit actionFinished(QLatin1String("like"), false, err, ctx); break;
         case ReqUnlikeForum: emit actionFinished(QLatin1String("unlike"), false, err, ctx); break;
         case ReqAgree: emit actionFinished(QLatin1String("agree"), false, err, ctx); break;
@@ -960,7 +906,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
         case ReqAddPost: emit actionFinished(QLatin1String("addPost"), false, err, QVariantMap()); break;
         case ReqReport: emit actionFinished(QLatin1String("report"), false, err, QVariantMap()); break;
         case ReqLogin: emit actionFinished(QLatin1String("login"), false, err, QVariantMap()); break;
-        case ReqCheckUpdate: emit actionFinished(QLatin1String("checkUpdate"), false, err, QVariantMap()); break;
         }
         return;
     }
@@ -982,7 +927,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
                 item.insert(QLatin1String("fid"), js(f, "forum_id"));
                 item.insert(QLatin1String("name"), js(f, "forum_name"));
                 item.insert(QLatin1String("avatar"), js(f, "avatar"));
-                item.insert(QLatin1String("isSignIn"), js(f, "is_sign_in"));
                 item.insert(QLatin1String("level"), js(f, "user_level"));
                 out << item;
             }
@@ -1191,27 +1135,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
         emit actionFinished(QLatin1String("login"), success, err, out);
         break;
     }
-    case ReqSign: {
-        bool parseOk = false;
-        QVariant root = Json::parse(data, &parseOk);
-        QVariantMap m = root.toMap();
-        QString err;
-        bool success = false;
-        if (!parseOk) err = QString::fromUtf8("解析失败");
-        else if (isError(m, &err)) err = err;
-        else success = true;
-        const bool oneKey = ctx.value(QLatin1String("onekey")).toBool();
-        if (oneKey) {
-            if (success) ++m_signSuccess; else ++m_signFailed;
-            const QString name = ctx.value(QLatin1String("kw")).toString();
-            emit signProgress(m_signIndex + 1, m_signQueue.size(), name, success);
-            ++m_signIndex;
-            continueOneKeySign();
-        } else {
-            emit actionFinished(QLatin1String("sign"), success, err, QVariantMap());
-        }
-        break;
-    }
     case ReqLikeForum: case ReqUnlikeForum: {
         bool parseOk = false;
         QVariant root = Json::parse(data, &parseOk);
@@ -1398,18 +1321,6 @@ void TiebaApi::handleResponse(int type, const QVariantMap &ctx, bool ok, int sta
         QVariantMap out;
         out.insert(QLatin1String("url"), js(m.value(QLatin1String("data")).toMap(), "url"));
         emit actionFinished(QLatin1String("report"), err.isEmpty(), err, out);
-        break;
-    }
-    case ReqCheckUpdate: {
-        bool parseOk = false;
-        QVariant root = Json::parse(data, &parseOk);
-        QVariantMap m = root.toMap();
-        if (parseOk) {
-            emit updateInfo(js(m, "tag_name"), js(m, "html_url"), js(m, "name"));
-        } else {
-            emit actionFinished(QLatin1String("checkUpdate"), false,
-                                QString::fromUtf8("更新信息解析失败"), QVariantMap());
-        }
         break;
     }
     }

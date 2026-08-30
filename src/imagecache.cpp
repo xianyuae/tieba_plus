@@ -89,6 +89,9 @@ void ImageCache::onFinished(int requestId, bool ok, int httpStatus, const QByteA
 
 void ImageCache::clear()
 {
+    m_http->cancelAll();
+    m_urlByRequest.clear();
+    m_inflight.clear();
     QDir dir(m_dir);
     const QStringList files = dir.entryList(QDir::Files);
     for (int i = 0; i < files.size(); ++i)

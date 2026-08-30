@@ -12,11 +12,6 @@ namespace {
 
 using namespace Proto;
 
-static void putMap(QVariantMap &m, const char *key, const QVariant &v)
-{
-    m.insert(QLatin1String(key), v);
-}
-
 static QString idStr(quint64 v) { return QString::number(v); }
 
 // ---- shared parsers ----
@@ -407,21 +402,6 @@ QVariantMap parseFrsForumInfo(const QByteArray &p)
         case 9: m.insert(QLatin1String("memberNum"), (int)r.varint()); break;
         case 10: m.insert(QLatin1String("threadNum"), (int)r.varint()); break;
         case 11: m.insert(QLatin1String("postNum"), (int)r.varint()); break;
-        case 15: {
-            PbReader sr(r.message());
-            int sf;
-            while ((sf = sr.next()) != 0) {
-                if (sf == 1) { // SignUser
-                    PbReader ur(sr.message());
-                    int uf;
-                    while ((uf = ur.next()) != 0) {
-                        if (uf == 2) m.insert(QLatin1String("isSignIn"), (int)ur.varint());
-                        else ur.skipField();
-                    }
-                } else sr.skipField();
-            }
-            break;
-        }
         case 24: m.insert(QLatin1String("avatar"), r.string()); break;
         case 25: m.insert(QLatin1String("slogan"), r.string()); break;
         default: r.skipField(); break;

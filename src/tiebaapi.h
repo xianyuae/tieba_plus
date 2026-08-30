@@ -36,8 +36,6 @@ public:
                            const QString &tbs = QString());
 
     // Actions
-    Q_INVOKABLE void signForum(const QString &fid, const QString &kw);
-    Q_INVOKABLE void oneKeySign(const QVariantList &forums); // [{fid,name},...]
     Q_INVOKABLE void likeForum(const QString &fid, const QString &kw);
     Q_INVOKABLE void unlikeForum(const QString &fid, const QString &kw);
     Q_INVOKABLE void agree(const QString &threadId, const QString &postId, bool cancel);
@@ -59,7 +57,6 @@ public:
     Q_INVOKABLE void loadForumDetail(const QString &forumId);
 
     // Misc
-    Q_INVOKABLE void checkUpdate();
     Q_INVOKABLE void cancelAll();
 
 signals:
@@ -79,9 +76,6 @@ signals:
     void userPostReady(const QVariantList &posts, bool hasMore, const QString &error);
     void forumDetailReady(const QVariantMap &forum, const QString &error);
     void actionFinished(const QString &action, bool ok, const QString &message, const QVariantMap &data);
-    void signProgress(int current, int total, const QString &forumName, bool success);
-    void oneKeySignDone(int success, int failed);
-    void updateInfo(const QString &version, const QString &url, const QString &notes);
     void loginExpired();
     void uploadProgress(int current, int total, const QString &path);
     void uploadDone(const QVariantList &results, const QString &error); // results: [{picId,width,height}]
@@ -94,11 +88,11 @@ private:
     enum RequestType {
         ReqFollowedForums = 1, ReqFrsPage, ReqThreadPage, ReqSubFloor,
         ReqSearchThread, ReqSearchForum, ReqSearchUser,
-        ReqSign, ReqLikeForum, ReqUnlikeForum, ReqAgree,
+        ReqLikeForum, ReqUnlikeForum, ReqAgree,
         ReqAddStore, ReqRemoveStore, ReqStoreList,
         ReqReplyMe, ReqAtMe, ReqMsg,
         ReqUserProfile, ReqUserPost, ReqForumDetail,
-        ReqAddPost, ReqCheckUpdate, ReqUploadPic, ReqReport, ReqLogin,
+        ReqAddPost, ReqUploadPic, ReqReport, ReqLogin,
         ReqPersonalized
     };
 
@@ -111,10 +105,6 @@ private:
     // Set once a secure protobuf request fails at transport level; all later
     // proto calls go over plain HTTP (see sendProto).
     bool m_preferInsecure;
-
-    // one-key sign state
-    QVariantList m_signQueue;
-    int m_signIndex, m_signSuccess, m_signFailed;
 
     // image upload state (sequential chunked multipart to /c/s/uploadPicture)
     QVariantList m_uploadPaths, m_uploadResults;
@@ -143,8 +133,6 @@ private:
     void sendProto(const QString &path, const QByteArray &body, bool needStoken,
                    const QString &forumName, int type, const QVariantMap &ctx);
     void retryProtoOverHttp(int type, const QVariantMap &ctx);
-    void signForumInternal(const QString &fid, const QString &kw, bool oneKey);
-    void continueOneKeySign();
     void handleResponse(int type, const QVariantMap &ctx, bool ok, int status,
                         const QByteArray &data, const QString &errString);
     bool isError(const QVariantMap &m, QString *msg);

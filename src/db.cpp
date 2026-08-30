@@ -65,11 +65,8 @@ bool Database::open(const QString &path)
         " keyword TEXT PRIMARY KEY )"));
     exec(QLatin1String(
         "CREATE TABLE IF NOT EXISTS forum_cache ("
-        " fid TEXT PRIMARY KEY, name TEXT, level TEXT, is_signed INTEGER DEFAULT 0,"
+        " fid TEXT PRIMARY KEY, name TEXT, level TEXT,"
         " updated_at INTEGER DEFAULT 0 )"));
-    exec(QLatin1String(
-        "CREATE TABLE IF NOT EXISTS sign_record ("
-        " date TEXT PRIMARY KEY, count INTEGER DEFAULT 0 )"));
     exec(QLatin1String(
         "CREATE TABLE IF NOT EXISTS page_cache ("
         " key TEXT PRIMARY KEY, data TEXT, updated_at INTEGER DEFAULT 0 )"));
@@ -316,7 +313,7 @@ void Database::removeBlacklistKeyword(const QString &keyword)
     q.exec();
 }
 
-// --- Forum cache + sign records ---
+// --- Forum cache ---
 QVariantList Database::forumCache() const
 {
     return query(QLatin1String("SELECT * FROM forum_cache ORDER BY name"));
@@ -330,15 +327,13 @@ void Database::replaceForumCache(const QList<QVariantMap> &forums)
     clear.exec(QLatin1String("DELETE FROM forum_cache"));
     QSqlQuery q(db);
     q.prepare(QLatin1String(
-        "INSERT OR REPLACE INTO forum_cache (fid, name, level, is_signed, updated_at) VALUES (?, ?, ?, ?, ?)"));
+        "INSERT OR REPLACE INTO forum_cache (fid, name, level, updated_at) VALUES (?, ?, ?, ?)"));
     for (int i = 0; i < forums.size(); ++i) {
         const QVariantMap &f = forums.at(i);
         q.bindValue(0, f.value(QLatin1String("fid")).toString());
         q.bindValue(1, f.value(QLatin1String("name")).toString());
         q.bindValue(2, f.value(QLatin1String("level")).toString());
-        q.bindValue(3, f.value(QLatin1String("isSignIn"),
-                              f.value(QLatin1String("is_signed"), 0)).toInt());
-        q.bindValue(4, QDateTime::currentMSecsSinceEpoch());
+        q.bindValue(3, QDateTime::currentMSecsSinceEpoch());
         if (!q.exec()) {
             db.rollback();
             return;
@@ -347,21 +342,17 @@ void Database::replaceForumCache(const QList<QVariantMap> &forums)
     db.commit();
 }
 
-bool Database::signedToday(const QString &date) const
+void Database::clearCache()
 {
-    QSqlQuery q(QSqlDatabase::database(QLatin1String("tieba")));
-    q.prepare(QLatin1String("SELECT 1 FROM sign_record WHERE date=? LIMIT 1"));
-    q.addBindValue(date);
-    return q.exec() && q.next();
-}
-
-void Database::markSigned(const QString &date, int count)
-{
-    QSqlQuery q(QSqlDatabase::database(QLatin1String("tieba")));
-    q.prepare(QLatin1String("INSERT OR REPLACE INTO sign_record (date, count) VALUES (?, ?)"));
-    q.addBindValue(date);
-    q.addBindValue(count);
-    q.exec();
+    QSqlDatabase db = QSqlDatabase::database(QLatin1String("tieba"));
+    db.transaction();
+    QSqlQuery q(db);
+    const bool forumsCleared = q.exec(QLatin1String("DELETE FROM forum_cache"));
+    const bool pagesCleared = q.exec(QLatin1String("DELETE FROM page_cache"));
+    if (forumsCleared && pagesCleared)
+        db.commit();
+    else
+        db.rollback();
 }
 
 // --- Offline page cache ---

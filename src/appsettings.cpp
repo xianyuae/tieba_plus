@@ -74,15 +74,6 @@ void AppSettings::setImmersive(bool on)
     }
 }
 
-bool AppSettings::autoSignOnLaunch() const { return settings().value(QLatin1String("sign/auto_on_launch"), false).toBool(); }
-void AppSettings::setAutoSignOnLaunch(bool on)
-{
-    if (on != this->autoSignOnLaunch()) {
-        settings().setValue(QLatin1String("sign/auto_on_launch"), on);
-        emit settingsChanged();
-    }
-}
-
 bool AppSettings::onlyWifiImages() const { return settings().value(QLatin1String("ui/only_wifi_images"), false).toBool(); }
 void AppSettings::setOnlyWifiImages(bool on)
 {

@@ -19,13 +19,22 @@ _pkg_verify_final/
 # Qt Creator user files
 *.pro.user
 
+# Local credentials, signing keys and runtime data
+*.jks
+*.keystore
+*.p12
+*.pem
+*.log
+*.db
+.env
+
 # Packages
 *.deb
 *.changes
 *.rpm
 
 # Binaries
-tieba
+/tieba
 tieba.exe
 
 # Misc

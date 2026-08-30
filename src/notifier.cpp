@@ -32,7 +32,7 @@ void Notifier::notify(const QString &title, const QString &body)
 
     QStringList actions;
     QVariantMap hints;
-    msg << QVariant(QLatin1String("TiebaLite"))
+    msg << QVariant(QString::fromUtf8("百度贴吧+"))
         << QVariant(quint32(0))
         << QVariant(QString())
         << QVariant(title)

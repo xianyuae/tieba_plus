@@ -61,6 +61,11 @@ void Util::copyText(const QString &text)
     emit toast(QString::fromUtf8("已复制到剪贴板"));
 }
 
+void Util::showToast(const QString &message)
+{
+    emit toast(message);
+}
+
 void Util::openUrl(const QString &url)
 {
     QDesktopServices::openUrl(QUrl(url));
