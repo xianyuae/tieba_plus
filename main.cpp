@@ -3,10 +3,8 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QString>
-#include <QtCore/QLocale>
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
-#include <QtCore/QTranslator>
 #include <QtCore/QTextCodec>
 #include <QtCore/QDateTime>
 #include <QtGui/QFont>
@@ -61,28 +59,16 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // load errors are visible on device and on desktop.
     qInstallMsgHandler(tiebaMessageHandler);
 
-    // Ensure any C++ tr()/qsTr() fallback decodes source text as UTF-8 rather
-    // than the locale codec (GBK on Chinese devices). All user-facing strings
-    // now live in qml/tieba/strings.js, which the QML engine reads with
-    // QString::fromUtf8 regardless of device locale.
+    // User-facing strings live in qml/tieba/strings.js, which the QML engine
+    // reads as UTF-8 regardless of the device locale.
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    // Bundle a CJK-capable font so Chinese text renders on every device.
+    // Harmattan provides the CJK font used by the application.
     const QString appDir = QCoreApplication::applicationDirPath();
-    QString fontFile;
-    const QStringList fontCandidates = QStringList()
-        << QDir(appDir).filePath(QLatin1String("fonts/MHei18030C5.ttf"))
-        << QDir(appDir).filePath(QLatin1String("../fonts/MHei18030C5.ttf"))
-        << QDir(appDir).filePath(QLatin1String("../../fonts/MHei18030C5.ttf"))
-        << QLatin1String("/usr/share/fonts/nokia/MHei18030C5.ttf");
-    for (int i = 0; i < fontCandidates.size(); ++i) {
-        if (QFile::exists(fontCandidates.at(i))) {
-            fontFile = fontCandidates.at(i);
-            break;
-        }
-    }
-    const int fontId = fontFile.isEmpty() ? -1 : QFontDatabase::addApplicationFont(fontFile);
+    const QString fontFile = QLatin1String("/usr/share/fonts/nokia/MHei18030C5.ttf");
+    const int fontId = QFile::exists(fontFile)
+        ? QFontDatabase::addApplicationFont(fontFile) : -1;
     if (fontId != -1) {
         const QStringList families = QFontDatabase::applicationFontFamilies(fontId);
         if (!families.isEmpty()) {
@@ -92,30 +78,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
             app->setFont(font);
         }
     }
-
-    // Translations (i18n/*.qm deployed to /opt/tieba/i18n).
-    QTranslator translator;
-    QString i18nDir;
-    const QStringList i18nCandidates = QStringList()
-        << QDir(appDir).filePath(QLatin1String("i18n"))
-        << QDir(appDir).filePath(QLatin1String("../i18n"))
-        << QDir(appDir).filePath(QLatin1String("../../i18n"));
-    for (int i = 0; i < i18nCandidates.size(); ++i) {
-        if (QFile::exists(QDir(i18nCandidates.at(i)).filePath(QLatin1String("tieba_en.qm")))) {
-            i18nDir = i18nCandidates.at(i);
-            break;
-        }
-    }
-    if (i18nDir.isEmpty())
-        i18nDir = QDir(appDir).filePath(QLatin1String("../i18n"));
-    const QString localeName = QLocale::system().name();
-    bool translationLoaded = translator.load(QLatin1String("tieba_") + localeName, i18nDir);
-    if (!translationLoaded)
-        translationLoaded = translator.load(QLatin1String("tieba_") + localeName.left(2), i18nDir);
-    if (!translationLoaded && localeName.left(2) != QLatin1String("zh"))
-        translationLoaded = translator.load(QLatin1String("tieba_en"), i18nDir);
-    if (translationLoaded)
-        app->installTranslator(&translator);
 
     // Initialize persistence + singletons before QML loads.
     const QString configDir = QDir::homePath() + QLatin1String("/.config/TiebaLite");

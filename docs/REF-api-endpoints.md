@@ -18,7 +18,6 @@ Generated for a Qt/C++ port. Field names below are the **exact wire names** (`@S
 | `OFFICIAL_PROTOBUF_TIEBA_V12_API` | `https://tiebac.baidu.com/` | `tieba/12.52.1.0` | protobuf, `x_bd_data_type: protobuf` |
 | `OFFICIAL_PROTOBUF_TIEBA_POST_API` | `https://tiebac.baidu.com/` | `tieba/12.35.1.0` | protobuf, used for add-post only |
 | `SOFIRE_API` | `https://sofire.baidu.com/` | (`x6/…` set per request) | encrypted Sofire transport |
-| Update check | `https://api.github.com/` | — | GitHub releases API |
 
 Client version constants (`Enums.kt`): `TIEBA_V11 = "11.10.8.6"`, `TIEBA_V12 = "12.52.1.0"`, `TIEBA_V12_POST = "12.35.1.0"`.
 
@@ -676,14 +675,6 @@ Response: `HotTopicThreadBean`.
 
 #### P6. `hotMessageList` (WEB) — `GET /mo/q/hotMessage/list?fr=newwise` (tieba.baidu.com)
 No query params. Response: `HotMessageListBean`.
-
----
-
-### Q. Update check
-
-#### Q1. GitHub latest release — `GET https://api.github.com/repos/min09577/TiebaLite/releases/latest`
-Header: `Accept: application/vnd.github+json`. Response JSON (relevant keys): `tag_name`, `html_url`, `name`, `assets[]` (`name`, `browser_download_url`).
-(Not Retrofit — raw `HttpURLConnection`.)
 
 ---
 

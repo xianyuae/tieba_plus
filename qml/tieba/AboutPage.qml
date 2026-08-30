@@ -119,6 +119,18 @@ Page {
             }
             Item { width: 1; height: 10 }
 
+            SettingsSectionLabel { title: S.S0213 }
+            SettingsCard {
+                SettingsRow {
+                    iconName: "info"
+                    title: S.S0214
+                    subtitle: "xianyuaa123@gmail.com"
+                    clickable: true
+                    onClicked: util.openUrl("mailto:xianyuaa123@gmail.com")
+                }
+            }
+            Item { width: 1; height: 10 }
+
             SettingsSectionLabel { title: S.S0004 }
             SettingsCard {
                 Item {

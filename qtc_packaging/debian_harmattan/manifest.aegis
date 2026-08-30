@@ -35,13 +35,13 @@
       * Final application package will not contain a manifest.
 
 -->
-<!-- TiebaLite needs network access (JSON/protobuf APIs, images, update check).
+<!-- Baidu Tieba+ needs network access (JSON/protobuf APIs and images).
      The binary links QtNetwork, so the automatic scan grants network; the
      explicit credential below is a safety net if auto-generation misses it. -->
 <aegis>
 	<request policy="add">
 
-		<!-- Internet access (JSON/protobuf APIs, images, update check). -->
+		<!-- Internet access (JSON/protobuf APIs and images). -->
 		<credential name="NetworkAccess" />
 
 	</request>

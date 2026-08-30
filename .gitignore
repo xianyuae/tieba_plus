@@ -5,6 +5,7 @@ Makefile
 moc_*.cpp
 moc_*.h
 *.moc
+*.qm
 
 # Build directories
 build*/
@@ -28,6 +29,8 @@ _pkg_verify_final/
 *.log
 *.db
 .env
+.env.*
+!.env.example
 
 # Packages
 *.deb
